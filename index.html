@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANAE - Encryption/Decryption</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="logo">ANAE</div>
+        <button class="theme-toggle" id="themeToggle">
+            <span id="themeIcon">☀️</span>
+        </button>
+    </nav>
+    
+    <div class="container">
+        <!-- Encryption/Decryption Mode Toggle -->
+        <div class="mode-toggle">
+            <button id="modeToggle">
+                <span id="modeIcon">🔒</span>
+                <span id="modeText">Verschlüsselung</span>
+            </button>
+        </div>
+        
+        <!-- Text Areas -->
+        <div class="text-areas">
+            <!-- Input Section -->
+            <div class="input-section">
+                <div class="section-header">
+                    <select id="languageSelect">
+                        <option value="caesar">Caesar</option>
+                        <option value="vigenere">Vigenère</option>
+                        <option value="base64">Base64</option>
+                        <option value="morse">Morse</option>
+                        <option value="binary">Binary</option>
+                    </select>
+                </div>
+                <textarea id="inputText" placeholder="Text eingeben..."></textarea>
+            </div>
+            
+            <!-- Output Section -->
+            <div class="output-section">
+                <div class="section-header">
+                    <span>Ergebnis</span>
+                </div>
+                <textarea id="outputText" placeholder="Verschlüsselter Text erscheint hier..." readonly></textarea>
+            </div>
+        </div>
+        
+        <!-- Buttons -->
+        <div class="button-group">
+            <button id="saveBtn">
+                <span class="icon">💾</span>
+                Speichern
+            </button>
+            <button id="downloadBtn">
+                <span class="icon">⬇️</span>
+                Download
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
