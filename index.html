@@ -1,67 +1,113 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ANAE - Encryption/Decryption</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <!-- Navigation Bar -->
-    <nav>
-        <div class="logo">ANAE</div>
-        <button class="theme-toggle" id="themeToggle">
-            <span id="themeIcon">☀️</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ANAE - Verschlüsselung & Entschlüsselung</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="logo">ANAE</div>
+      <div class="nav-items">
+        <button id="toggleSavedBtn" class="nav-button">
+          <i class="fas fa-folder"></i> Gespeichert
         </button>
+        <button id="toggleThemeBtn" class="nav-button">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
     </nav>
-    
+
     <div class="container">
-        <!-- Encryption/Decryption Mode Toggle -->
-        <div class="mode-toggle">
-            <button id="modeToggle">
-                <span id="modeIcon">🔒</span>
-                <span id="modeText">Verschlüsselung</span>
-            </button>
+      <div class="sidebar" id="savedList">
+        <h3>Gespeicherte Texte</h3>
+        <div class="saved-items" id="savedItemsList">
+          <!-- Gespeicherte Einträge werden hier dynamisch eingefügt -->
         </div>
-        
-        <!-- Text Areas -->
-        <div class="text-areas">
-            <!-- Input Section -->
-            <div class="input-section">
-                <div class="section-header">
-                    <select id="languageSelect">
-                        <option value="caesar">Caesar</option>
-                        <option value="vigenere">Vigenère</option>
-                        <option value="base64">Base64</option>
-                        <option value="morse">Morse</option>
-                        <option value="binary">Binary</option>
-                    </select>
-                </div>
-                <textarea id="inputText" placeholder="Text eingeben..."></textarea>
+      </div>
+
+      <main class="main-content">
+        <div class="encryption-container">
+          <div class="input-section">
+            <h2>Eingabe</h2>
+            <div class="controls">
+              <select id="inputType" class="select-dropdown">
+                <option value="text">Text</option>
+                <option value="binary">Binär</option>
+                <option value="caesar">Cäsar</option>
+              </select>
+              <div id="caesarShiftContainer" class="shift-container hidden">
+                <label for="caesarShift">Verschiebung:</label>
+                <input
+                  type="number"
+                  id="caesarShift"
+                  min="1"
+                  max="25"
+                  value="3"
+                />
+              </div>
             </div>
-            
-            <!-- Output Section -->
-            <div class="output-section">
-                <div class="section-header">
-                    <span>Ergebnis</span>
-                </div>
-                <textarea id="outputText" placeholder="Verschlüsselter Text erscheint hier..." readonly></textarea>
+            <textarea
+              id="inputText"
+              placeholder="Text zum Verschlüsseln/Entschlüsseln eingeben..."
+            ></textarea>
+          </div>
+
+          <div class="action-buttons">
+            <button id="encryptBtn" class="action-button">
+              <i class="fas fa-lock"></i> Verschlüsseln
+            </button>
+            <button id="decryptBtn" class="action-button">
+              <i class="fas fa-unlock"></i> Entschlüsseln
+            </button>
+          </div>
+
+          <div class="output-section">
+            <h2>Ausgabe</h2>
+            <div class="controls">
+              <select id="outputType" class="select-dropdown">
+                <option value="text">Text</option>
+                <option value="binary">Binär</option>
+                <option value="caesar">Cäsar</option>
+              </select>
+              <div
+                id="outputCaesarShiftContainer"
+                class="shift-container hidden"
+              >
+                <label for="outputCaesarShift">Verschiebung:</label>
+                <input
+                  type="number"
+                  id="outputCaesarShift"
+                  min="1"
+                  max="25"
+                  value="3"
+                />
+              </div>
             </div>
+            <textarea
+              id="outputText"
+              placeholder="Ergebnis erscheint hier..."
+              readonly
+            ></textarea>
+          </div>
         </div>
-        
-        <!-- Buttons -->
-        <div class="button-group">
-            <button id="saveBtn">
-                <span class="icon">💾</span>
-                Speichern
-            </button>
-            <button id="downloadBtn">
-                <span class="icon">⬇️</span>
-                Download
-            </button>
+
+        <div class="bottom-actions">
+          <button id="saveBtn" class="bottom-button">
+            <i class="fas fa-save"></i> Speichern
+          </button>
+          <button id="downloadBtn" class="bottom-button">
+            <i class="fas fa-download"></i> Herunterladen
+          </button>
         </div>
+      </main>
     </div>
 
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
