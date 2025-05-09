@@ -3,8 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const outputType = document.getElementById("outputType");
   const inputText = document.getElementById("inputText");
   const outputText = document.getElementById("outputText");
-  const encryptBtn = document.getElementById("encryptBtn");
-  const decryptBtn = document.getElementById("decryptBtn");
+  const actionBtn = document.getElementById("actionBtn");
   const saveBtn = document.getElementById("saveBtn");
   const downloadBtn = document.getElementById("downloadBtn");
   const toggleSavedBtn = document.getElementById("toggleSavedBtn");
@@ -27,8 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Event Listeners
   inputType.addEventListener("change", handleInputTypeChange);
   outputType.addEventListener("change", handleOutputTypeChange);
-  encryptBtn.addEventListener("click", encrypt);
-  decryptBtn.addEventListener("click", decrypt);
+  actionBtn.addEventListener("click", handleAction);
   saveBtn.addEventListener("click", saveItem);
   downloadBtn.addEventListener("click", downloadText);
   toggleSavedBtn.addEventListener("click", toggleSavedList);
@@ -51,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function encrypt() {
+  function handleAction() {
     if (!inputText.value.trim()) {
       showNotification("Bitte gib einen Text ein!", "error");
       return;
@@ -63,8 +61,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const inShift = parseInt(caesarShift.value);
     const outShift = parseInt(outputCaesarShift.value);
 
-    // Anfrage an den Server senden
-    fetch("/api/encrypt", {
+    // Decide whether to encrypt or decrypt based on outputText content
+    // If output is empty, encrypt; if output has content, decrypt
+    const shouldEncrypt = !outputText.value.trim();
+
+    const endpoint = shouldEncrypt ? "/api/encrypt" : "/api/decrypt";
+
+    fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -81,54 +84,18 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((data) => {
         if (data.success) {
           outputText.value = data.result;
-          showNotification("Verschlüsselung erfolgreich!", "success");
-        } else {
           showNotification(
-            data.message || "Fehler bei der Verschlüsselung",
-            "error"
+            shouldEncrypt
+              ? "Verschlüsselung erfolgreich!"
+              : "Entschlüsselung erfolgreich!",
+            "success"
           );
-        }
-      })
-      .catch((error) => {
-        console.error("Fehler:", error);
-        showNotification("Fehler bei der Verbindung zum Server", "error");
-      });
-  }
-
-  function decrypt() {
-    if (!inputText.value.trim()) {
-      showNotification("Bitte gib einen Text ein!", "error");
-      return;
-    }
-
-    const inType = inputType.value;
-    const outType = outputType.value;
-    const text = inputText.value;
-    const inShift = parseInt(caesarShift.value);
-    const outShift = parseInt(outputCaesarShift.value);
-
-    // Anfrage an den Server senden
-    fetch("/api/decrypt", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        input_type: inType,
-        output_type: outType,
-        text: text,
-        input_shift: inShift,
-        output_shift: outShift,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          outputText.value = data.result;
-          showNotification("Entschlüsselung erfolgreich!", "success");
         } else {
           showNotification(
-            data.message || "Fehler bei der Entschlüsselung",
+            data.message ||
+              (shouldEncrypt
+                ? "Fehler bei der Verschlüsselung"
+                : "Fehler bei der Entschlüsselung"),
             "error"
           );
         }
@@ -154,16 +121,13 @@ document.addEventListener("DOMContentLoaded", function () {
       timestamp: timestamp,
       input: {
         type: inputType.value,
-        shift:
-          inputType.value === "caesar" ? parseInt(caesarShift.value) : null,
+        shift: inputType.value === "caesar" ? parseInt(caesarShift.value) : null,
         text: inputText.value,
       },
       output: {
         type: outputType.value,
         shift:
-          outputType.value === "caesar"
-            ? parseInt(outputCaesarShift.value)
-            : null,
+          outputType.value === "caesar" ? parseInt(outputCaesarShift.value) : null,
         text: outputText.value,
       },
     };
