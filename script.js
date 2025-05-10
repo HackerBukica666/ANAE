@@ -117,7 +117,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const timestamp = new Date().toLocaleString();
     const newItem = {
-      id: Date.now().toString(),
       timestamp: timestamp,
       input: {
         type: inputType.value,
@@ -132,15 +131,6 @@ document.addEventListener("DOMContentLoaded", function () {
       },
     };
 
-    // Zum Array hinzufügen
-    savedItems.unshift(newItem);
-
-    // Im lokalen Speicher speichern
-    localStorage.setItem("anae_saved_items", JSON.stringify(savedItems));
-
-    // Gespeicherte Liste aktualisieren
-    updateSavedItemsList();
-
     // Server-Anfrage zum Speichern
     fetch("/api/save", {
       method: "POST",
@@ -152,10 +142,15 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
+          // Add the returned id to the newItem
+          newItem.id = data.id;
+          // Add to savedItems array and update UI
+          savedItems.unshift(newItem);
+          updateSavedItemsList();
           showNotification("Erfolgreich gespeichert!", "success");
         } else {
           showNotification(
-            "Lokale Speicherung erfolgreich, Server-Speicherung fehlgeschlagen.",
+            "Server-Speicherung fehlgeschlagen.",
             "warning"
           );
         }
@@ -163,7 +158,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .catch((error) => {
         console.error("Fehler:", error);
         showNotification(
-          "Lokale Speicherung erfolgreich, Server-Verbindungsfehler.",
+          "Server-Verbindungsfehler.",
           "warning"
         );
       });
@@ -229,26 +224,12 @@ ${outputText.value}
   }
 
   function loadSavedItems() {
-    const saved = localStorage.getItem("anae_saved_items");
-    if (saved) {
-      savedItems = JSON.parse(saved);
-      updateSavedItemsList();
-    }
-
     // Vom Server laden
     fetch("/api/saved")
       .then((response) => response.json())
       .then((data) => {
         if (data.success && data.items) {
-          // Lokale und Server-Elemente zusammenführen
-          const serverIds = new Set(data.items.map((item) => item.id));
-          const onlyLocal = savedItems.filter(
-            (item) => !serverIds.has(item.id)
-          );
-          savedItems = [...data.items, ...onlyLocal];
-
-          // Lokal speichern und Liste aktualisieren
-          localStorage.setItem("anae_saved_items", JSON.stringify(savedItems));
+          savedItems = data.items;
           updateSavedItemsList();
         }
       })
@@ -293,14 +274,51 @@ ${outputText.value}
       timeElement.style.marginTop = "0.3rem";
       timeElement.style.color = "#777";
 
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "delete-btn";
+      deleteBtn.textContent = "Löschen";
+      deleteBtn.style.marginLeft = "10px";
+      deleteBtn.style.backgroundColor = "#ff3333";
+      deleteBtn.style.color = "#fff";
+      deleteBtn.style.border = "none";
+      deleteBtn.style.padding = "2px 6px";
+      deleteBtn.style.borderRadius = "3px";
+      deleteBtn.style.cursor = "pointer";
+
+      deleteBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        deleteSavedItem(item.id);
+      });
+
       itemElement.appendChild(titleElement);
       itemElement.appendChild(previewElement);
       itemElement.appendChild(timeElement);
+      itemElement.appendChild(deleteBtn);
 
       itemElement.addEventListener("click", () => loadSavedItem(item));
 
       savedItemsList.appendChild(itemElement);
     });
+  }
+
+  function deleteSavedItem(id) {
+    fetch(`/api/delete/${id}`, {
+      method: "DELETE",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          savedItems = savedItems.filter((item) => item.id !== id);
+          updateSavedItemsList();
+          showNotification("Eintrag gelöscht!", "success");
+        } else {
+          showNotification("Löschen fehlgeschlagen!", "error");
+        }
+      })
+      .catch((error) => {
+        console.error("Fehler beim Löschen:", error);
+        showNotification("Fehler beim Löschen des Eintrags", "error");
+      });
   }
 
   function loadSavedItem(item) {

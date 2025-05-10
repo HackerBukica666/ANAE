@@ -1,36 +1,34 @@
 from flask import Flask, request, jsonify, send_from_directory
-import json
 import os
+import sqlite3
 from datetime import datetime
 from crypto import encrypt_text, decrypt_text
 
 app = Flask(__name__, static_folder='.')
 app.config['JSON_AS_ASCII'] = False
 
-# Stellen Sie sicher, dass die JSON-Datei existiert
-DATA_FILE = 'data.json'
-if not os.path.exists(DATA_FILE):
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
-        json.dump({"items": []}, f, ensure_ascii=False, indent=4)
+DB_FILE = 'data.db'
 
-# Daten aus JSON laden
-def load_data():
-    try:
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception as e:
-        print(f"Fehler beim Laden der Daten: {e}")
-        return {"items": []}
+def get_db_connection():
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    return conn
 
-# Daten in JSON speichern
-def save_data(data):
-    try:
-        with open(DATA_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-        return True
-    except Exception as e:
-        print(f"Fehler beim Speichern der Daten: {e}")
-        return False
+def init_db():
+    if not os.path.exists(DB_FILE):
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                data TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        conn.commit()
+        conn.close()
+
+init_db()
 
 # Routen für statische Dateien
 @app.route('/')
@@ -76,28 +74,55 @@ def api_decrypt():
 def api_save():
     try:
         item = request.json
+        data_str = str(item)
         
-        # Daten laden
-        data = load_data()
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO items (data) VALUES (?)', (data_str,))
+        conn.commit()
+        inserted_id = cursor.lastrowid
+        conn.close()
         
-        # Neues Element hinzufügen (am Anfang der Liste)
-        data["items"].insert(0, item)
-        
-        # Daten speichern
-        if save_data(data):
-            return jsonify({"success": True})
-        else:
-            return jsonify({"success": False, "message": "Fehler beim Speichern"}), 500
+        return jsonify({"success": True, "id": inserted_id})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
 
 @app.route('/api/saved', methods=['GET'])
 def api_get_saved():
     try:
-        data = load_data()
-        return jsonify({"success": True, "items": data["items"]})
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, data, created_at FROM items ORDER BY created_at DESC')
+        rows = cursor.fetchall()
+        conn.close()
+        
+        items = []
+        for row in rows:
+            # Convert string representation back to dict if possible
+            try:
+                import ast
+                item_dict = ast.literal_eval(row['data'])
+            except:
+                item_dict = {"data": row['data']}
+            item_dict['id'] = row['id']
+            item_dict['created_at'] = row['created_at']
+            items.append(item_dict)
+        
+        return jsonify({"success": True, "items": items})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 400
+
+@app.route('/api/delete/<int:item_id>', methods=['DELETE'])
+def api_delete(item_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM items WHERE id = ?', (item_id,))
+        conn.commit()
+        conn.close()
+        return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='127.0.0.1', port=5000)
