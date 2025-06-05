@@ -34,6 +34,13 @@ ANAE ist eine Webanwendung zur Verschlüsselung und Entschlüsselung von Text mi
 ```bash
 pip install flask
 ```
+! Wenn das Problem 'bash: pip: command not found' auftaucht muss man diese bash codes ausführen:
+- py --version
+- py -m pip --version                                       
+! wenn bis jetzt jeweils kein fehler auftaucht kann man mit dem folgenden code flask installiren
+- py -m pip install flask
+! wenn es fehler gab konsultieren sie das internet
+
 
 3. Starte die Anwendung:
 
