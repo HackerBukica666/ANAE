@@ -39,11 +39,11 @@ pip install flask
 py --version //python oder python3 können auch anstelle von py stehen
 py -m pip --version
 ```                                       
-- **!** Wenn bis jetzt jeweils kein fehler auftaucht kann man mit dem folgenden code flask installiren
+- **!** Wenn bis jetzt jeweils kein Fehler auftaucht kann man mit dem folgenden code flask installiren
 ```bash
 py -m pip install flask
 ```
-- **!** Wenn es fehler gab konsultieren Sie das Internet
+- **!** Wenn es Fehler gab konsultieren Sie das Internet
 
 3. Starte die Anwendung:
 
