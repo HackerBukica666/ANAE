@@ -22,7 +22,7 @@ ANAE ist eine Webanwendung zur Verschlüsselung und Entschlüsselung von Text mi
 
 - Python 3.6 oder höher
 - Flask (Python-Framework)
-- SQLite3 (ist in Python standardmäßig enthalten)
+- SQLite3 (ist in Python standardmässig enthalten)
 - Internetverbindung für Font Awesome Icons (CDN)
 
 ### Installation
